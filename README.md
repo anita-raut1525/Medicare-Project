@@ -1,26 +1,40 @@
 # Medicare
 
-Medicare is a healthcare web application built as an end-to-end Cloud and DevOps learning project.
+Medicare is a full-stack healthcare application built as a Cloud and DevOps learning project.
 
-## Goal
+## Project Components
 
-Build, containerize, deploy, automate, monitor, secure, and troubleshoot a real application.
+- Frontend: React
+- Backend: Java + Spring Boot
+- Database: MySQL
+- Version Control: Git + GitHub
+- Containerization: Docker
+- Cloud: AWS
+- Infrastructure as Code: Terraform
+- CI/CD: Jenkins
+- Container Registry: Amazon ECR
+- Orchestration: Kubernetes / Amazon EKS
+- GitOps: ArgoCD
+- Monitoring: Prometheus + Grafana
 
-## Technology
+## Architecture
 
-Frontend: React + Vite
-Backend: Java + Spring Boot
-Database: MySQL
+User
+→ Frontend
+→ REST API
+→ Backend
+→ MySQL
 
-DevOps:
-Git
-GitHub
-Docker
-AWS
-Terraform
-Jenkins
-ECR
-Kubernetes
-Prometheus
-Grafana
-CloudWatch
+## DevOps Flow
+
+Developer
+→ GitHub
+→ Jenkins
+→ Build & Test
+→ Docker
+→ Amazon ECR
+→ Kubernetes / EKS
+
+## Project Status
+
+Currently under development.
