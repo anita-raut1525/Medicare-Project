@@ -1,29 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DoctorCard from './DoctorCard'
 
 function Doctors() {
+  const [doctors, setDoctors] = useState([])
   const [search, setSearch] = useState('')
 
-  const doctors = [
-    {
-      id: 1,
-      name: 'Dr. Rakesh',
-      specialty: 'Cardiologist',
-      experience: 10,
-    },
-    {
-      id: 2,
-      name: 'Dr. Priya Singh',
-      specialty: 'Dermatologist',
-      experience: 8,
-    },
-    {
-      id: 3,
-      name: 'Dr. Prisha Patel',
-      specialty: 'General Physician',
-      experience: 12,
-    },
-  ]
+  useEffect(() => {
+    fetch('/api/doctors')
+      .then((response) => response.json())
+      .then((data) => {
+        setDoctors(data)
+      })
+      .catch((error) => {
+        console.error('Error fetching doctors:', error)
+      })
+  }, [])
 
   const filteredDoctors = doctors.filter((doctor) => {
     const searchText = search.toLowerCase()
