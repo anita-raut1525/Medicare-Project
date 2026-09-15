@@ -38,3 +38,8 @@ Developer
 ## Project Status
 
 Currently under development.
+
+
+## Git Branching Strategy
+
+feature/* → develop → release/* → main
