@@ -38,3 +38,7 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8082
 
 CMD ["java", "-jar", "app.jar"]
+
+
+# Backend run
+# mvn spring-boot:run
