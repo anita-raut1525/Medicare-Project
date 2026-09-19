@@ -1,12 +1,12 @@
-resource "aws_security_group" "jenkins" {
-  name        = "medicare-${var.environment}-jenkins-sg"
-  description = "Security group for Jenkins"
+resource "aws_security_group" "alb" {
+  name        = "medicare-${var.environment}-alb-sg"
+  description = "Security group for Medicare ALB"
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Jenkins Web UI"
-    from_port   = 8080
-    to_port     = 8080
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -19,8 +19,10 @@ resource "aws_security_group" "jenkins" {
   }
 
   tags = {
-    Name        = "medicare-${var.environment}-jenkins-sg"
+    Name        = "medicare-${var.environment}-alb-sg"
     Environment = var.environment
     Project     = "Medicare"
   }
 }
+
+

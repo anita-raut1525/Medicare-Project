@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: medicare-backend
+  namespace: medicare-dev
+  labels:
+    app: medicare-backend
+    environment: dev
+    project: medicare
+spec:
+  type: ClusterIP
+  selector:
+    app: medicare-backend
+  ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
