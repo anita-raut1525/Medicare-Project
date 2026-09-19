@@ -16,6 +16,10 @@ target/
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+*.tfplan
+*.plan
+tfplan
+plan.txt
 crash.log
 
 # IDE
