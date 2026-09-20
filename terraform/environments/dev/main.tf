@@ -26,10 +26,11 @@ module "jenkins" {
   private_subnet_id = module.network.private_subnet_ids[0]
   security_group_id = module.security.jenkins_security_group_id
 
-  instance_type = "t3.small"
+  instance_type = "t3.micro"
   ami_id        = "ami-01a00762f46d584a1"
 }
 
+/*
 
 module "ecr" {
   source = "../../modules/ecr"
@@ -37,12 +38,12 @@ module "ecr" {
   environment = var.environment
 }
 
-module "eks" {
-  source = "../../modules/eks"
+ module "eks" {
+source = "../../modules/eks"
 
-  environment = var.environment
+environment = var.environment
 
-  cluster_name = "medicare-${var.environment}-eks"
+cluster_name = "medicare-${var.environment}-eks"
 
   private_subnet_ids = module.network.private_subnet_ids
 
@@ -66,3 +67,4 @@ module "iam" {
   cluster_name = module.eks.cluster_name
   oidc_issuer  = module.eks.oidc_issuer
 }
+ */
