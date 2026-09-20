@@ -11,3 +11,7 @@ variable "public_subnet_ids" {
 }
 
 
+variable "jenkins_instance_id" {
+  type = string
+}
+
