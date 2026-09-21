@@ -11,10 +11,10 @@ pipeline {
 
         DOCKERHUB_USER = 'anitaraut'
 
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG = "v${BUILD_NUMBER}"
 
-        BACKEND_IMAGE = 'medicare-backend:v1'
-        FRONTEND_IMAGE = 'medicare-frontend:v1'
+        BACKEND_IMAGE = 'medicare-backend'
+        FRONTEND_IMAGE = 'medicare-frontend'
 
         BACKEND_CONTAINER = 'medicare-backend'
         FRONTEND_CONTAINER = 'medicare-frontend'
