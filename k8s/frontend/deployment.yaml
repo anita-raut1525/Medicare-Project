@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: medicare-frontend
-          image: PLACEHOLDER_ECR_FRONTEND_IMAGE
+          image: medicare-frontend:3
 
           ports:
             - containerPort: 80

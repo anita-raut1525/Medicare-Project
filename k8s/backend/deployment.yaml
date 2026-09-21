@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: medicare-backend
-          image: PLACEHOLDER_ECR_BACKEND_IMAGE
+          image: medicare-backend:3
           ports:
             - containerPort: 8082
 
