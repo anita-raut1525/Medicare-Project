@@ -258,9 +258,9 @@ pipeline {
                     docker ps
 
 
-                    echo "===== Backend API Test ====="
+                    echo "===== Backend API Test  ====="
 
-                    sleep 10
+                    sleep 30
 
                     curl -f http://localhost:8082/api/doctors
                 '''
