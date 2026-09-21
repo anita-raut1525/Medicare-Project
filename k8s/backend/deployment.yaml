@@ -31,7 +31,7 @@ spec:
               valueFrom: 
                 configMapKeyRef:
                  key: DB_URL
-              name: medicare-backend-config
+                 name: medicare-backend-config
             - name: SERVER_PORT
               valueFrom:
                 configMapKeyRef:
