@@ -3,13 +3,9 @@ kind: ConfigMap
 metadata:
   name: medicare-backend-config
   namespace: medicare-dev
-  labels:
-    app: medicare-backend
-    environment: dev
-    project: medicare
 data:
   SERVER_PORT: "8082"
-  DB_HOST: "medicare-mysql"
-  DB_URL: jdbc:mysql://medicare-mysql:3306/Medicare
-  DB_NAME: "Medicare"
+  DB_HOST: medicare-mysql
   DB_PORT: "3306"
+  DB_NAME: Medicare
+  DB_URL: jdbc:mysql://medicare-mysql:3306/Medicare

@@ -58,16 +58,19 @@ spec:
                 secretKeyRef:
                   name: medicare-mysql-secret
                   key: MYSQL_ROOT_PASSWORD
+
             - name: MYSQL_DATABASE
               valueFrom:
                 configMapKeyRef:
                   name: medicare-mysql-config
                   key: MYSQL_DATABASE
+
             - name: MYSQL_USER
               valueFrom:
                 secretKeyRef:
                   name: medicare-mysql-secret
                   key: MYSQL_USER
+
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:

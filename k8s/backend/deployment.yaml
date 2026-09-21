@@ -7,6 +7,7 @@ metadata:
     app: medicare-backend
     environment: dev
     project: medicare
+
 spec:
   replicas: 2
 
@@ -19,19 +20,22 @@ spec:
       labels:
         app: medicare-backend
         environment: dev
+
     spec:
       containers:
         - name: medicare-backend
           image: anitaraut/medicare-backend:v3
+
           ports:
             - containerPort: 8082
 
           env:
             - name: DB_URL
-              valueFrom: 
+              valueFrom:
                 configMapKeyRef:
-                 key: DB_URL
-                 name: medicare-backend-config
+                  name: medicare-backend-config
+                  key: DB_URL
+
             - name: SERVER_PORT
               valueFrom:
                 configMapKeyRef:
