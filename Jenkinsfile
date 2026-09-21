@@ -1,170 +1,291 @@
+
 pipeline {
 
-    agent any  
+    agent any
 
     environment {
 
-      // ======================================
-      //   Image Configuration 
-     // =======================================
+        // ==========================================
+        // Docker Configuration
+        // ==========================================
 
-            IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKERHUB_USER = 'anitaraut'
 
-            BACKEND_IMAGE = "medicare-backend"
+        IMAGE_TAG = "${BUILD_NUMBER}"
 
-            FRONTEND_IMAGE = "medicare-frontend"
+        BACKEND_IMAGE = 'medicare-backend'
+        FRONTEND_IMAGE = 'medicare-frontend'
 
-            NETWORK = "medicare-network"
+        BACKEND_CONTAINER = 'medicare-backend'
+        FRONTEND_CONTAINER = 'medicare-frontend'
 
-// ========================================== 
-// Jenkins Credentials 
-// ==========================================
+        DOCKER_NETWORK = 'medicare-network'
 
-        GITHUB_CREDENTIALS_ID = "github-cred"
 
-       DOCKER_CREDENTIALS = credentials('dockerhub-cred')
+        // ==========================================
+        // Jenkins Credentials
+        // ==========================================
 
-           
+        GITHUB_CREDENTIALS_ID = 'github-cred'
+
+        DOCKER_CREDENTIALS_ID = 'dockerhub-cred'
     }
 
-// ==============================
-//  1. CHECKOUT 
-// ==============================
-  stages {
-         
-stage ('Checkout') {
 
-    steps {
+    stages {
 
-        echo  "Checking out medicare source code"
+        // ==========================================
+        // 1. Checkout
+        // ==========================================
 
-        git (
-         
-         branch: 'main',
-         credentialsId: "$GITHUB_CREDENTIALS_ID",
-         url: 'https://github.com/anita-raut1525/Medicare-Project.git'
-
-        )
-    }
-}
-
-// ========================================== 
-// 2. BACKEND BUILD 
-// ==========================================
-
-stage ('Backend Build') {
-
-steps {
-
-    dir ('backend') {
-
-        sh 'mvn clean package -DskipTests'
-
-    }
-}
-
-}
-
-// ========================================== 
-// 3. FRONTEND BUILD 
-// ==========================================
-
-
-stage ('Frontend Build') {
-
-    steps {
-
-        dir ('frontend') {
-
-            sh 'npm install'
-            sh 'npm run build'
-        }
-    }
-}
-
-
-
-
- // ========================================== 
-// 5. DOCKER LOGIN
-// ==========================================
-
-stage('Docker Login') {
-
+        stage('Checkout') {
             steps {
-
-                echo 'Logging in to Docker Hub...'
-                
-
-                sh 'echo "$DOCKER_CREDENTIALS_PSW" | docker login -u "$DOCKER_CREDENTIALS_USR" --password-stdin'
-        
+                checkout scm
             }
         }
 
 
- // ========================================== 
-// 4. DOCKER BUILD
-// ==========================================
+        // ==========================================
+        // 2. Prepare Docker Network
+        // ==========================================
 
-stage ('Docker Build') {
+        stage('Prepare Docker Network') {
+            steps {
+                sh '''
+                    echo "===== Checking Docker Network ====="
 
-    steps {
-        sh 'docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} ./backend'
+                    docker network inspect ${DOCKER_NETWORK} >/dev/null 2>&1 || \
+                    docker network create ${DOCKER_NETWORK}
 
-        sh 'docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} ./frontend'
-
-
-    }
-}
-
-
- // ========================================== 
-// 6. DOCKER TAG
-// ==========================================
-
-stage ('Docker Tag') {
-
-    steps {
-
-        sh 'docker tag ${BACKEND_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDENTIALS_USR}/${BACKEND_IMAGE}:${IMAGE_TAG}'
-
-         sh 'docker tag ${FRONTEND_IMAGE}:${IMAGE_TAG} ${DOCKER_CREDENTIALS_USR}/${FRONTEND_IMAGE}:${IMAGE_TAG}'
-    }
-}
-
-
- // ========================================== 
-// 7. DOCKER TAG
-// ==========================================
-
-stage('Docker Push') {
-
-    steps {
-
-        sh 'docker push ${DOCKER_CREDENTIALS_USR}/${BACKEND_IMAGE}:${IMAGE_TAG}'
-
-         sh 'docker push ${DOCKER_CREDENTIALS_USR}/${FRONTEND_IMAGE}:${IMAGE_TAG}'
-            
-           }
-
+                    echo "Docker network is ready."
+                '''
+            }
         }
 
- // ========================================== 
-// 8. VERIFY IMAGES
-// ==========================================
 
-stage ('Verify Images') {
+        // ==========================================
+        // 3. Clean Old Application Containers
+        // ==========================================
 
-    steps {
+        stage('Clean Old Deployment') {
+            steps {
+                sh '''
+                    echo "===== Removing Old Application Containers ====="
 
-    echo "Verifying docker images"
+                    docker rm -f ${BACKEND_CONTAINER} 2>/dev/null || true
+                    docker rm -f ${FRONTEND_CONTAINER} 2>/dev/null || true
 
-    sh 'docker  images | grep medicare'
-}
-        
-}
+                    echo "Old application containers removed."
+                '''
+            }
+        }
 
+
+        // ==========================================
+        // 4. Docker Build
+        // ==========================================
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    echo "===== Building Backend Image ====="
+
+                    docker build \
+                        -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
+                        ./backend
+
+
+                    echo "===== Building Frontend Image ====="
+
+                    docker build \
+                        -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
+                        ./frontend
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 5. Docker Hub Login - ONE TIME
+        // ==========================================
+
+        stage('Docker Hub Login') {
+            steps {
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: "${DOCKER_CREDENTIALS_ID}",
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+
+                    sh '''
+                        echo "===== Docker Hub Login ====="
+
+                        echo "$DOCKER_PASS" | docker login \
+                            -u "$DOCKER_USER" \
+                            --password-stdin
+                    '''
+                }
+            }
+        }
+
+
+        // ==========================================
+        // 6. Tag Images
+        // ==========================================
+
+        stage('Tag Images') {
+            steps {
+                sh '''
+                    echo "===== Tagging Backend Image ====="
+
+                    docker tag \
+                        ${BACKEND_IMAGE}:${IMAGE_TAG} \
+                        ${DOCKERHUB_USER}/${BACKEND_IMAGE}:${IMAGE_TAG}
+
+
+                    echo "===== Tagging Frontend Image ====="
+
+                    docker tag \
+                        ${FRONTEND_IMAGE}:${IMAGE_TAG} \
+                        ${DOCKERHUB_USER}/${FRONTEND_IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 7. Push Images to Docker Hub
+        // ==========================================
+
+        stage('Push Images to Docker Hub') {
+            steps {
+                sh '''
+                    echo "===== Pushing Backend Image ====="
+
+                    docker push \
+                        ${DOCKERHUB_USER}/${BACKEND_IMAGE}:${IMAGE_TAG}
+
+
+                    echo "===== Pushing Frontend Image ====="
+
+                    docker push \
+                        ${DOCKERHUB_USER}/${FRONTEND_IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 8. Pull Images from Docker Hub
+        // ==========================================
+
+        stage('Pull Images') {
+            steps {
+                sh '''
+                    echo "===== Pulling Backend Image ====="
+
+                    docker pull \
+                        ${DOCKERHUB_USER}/${BACKEND_IMAGE}:${IMAGE_TAG}
+
+
+                    echo "===== Pulling Frontend Image ====="
+
+                    docker pull \
+                        ${DOCKERHUB_USER}/${FRONTEND_IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 9. Deploy Backend
+        // ==========================================
+
+        stage('Deploy Backend') {
+            steps {
+                sh '''
+                    echo "===== Starting Backend Container ====="
+
+                    docker run -d \
+                        --name ${BACKEND_CONTAINER} \
+                        --network ${DOCKER_NETWORK} \
+                        -e DB_URL="jdbc:mysql://medicare-mysql:3306/medicare" \
+                        -e DB_USERNAME="medicareuser" \
+                        -e DB_PASSWORD="medicare123" \
+                        -p 8082:8082 \
+                        ${DOCKERHUB_USER}/${BACKEND_IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 10. Deploy Frontend
+        // ==========================================
+
+        stage('Deploy Frontend') {
+            steps {
+                sh '''
+                    echo "===== Starting Frontend Container ====="
+
+                    docker run -d \
+                        --name ${FRONTEND_CONTAINER} \
+                        --network ${DOCKER_NETWORK} \
+                        -p 80:80 \
+                        ${DOCKERHUB_USER}/${FRONTEND_IMAGE}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+
+        // ==========================================
+        // 11. Verify Deployment
+        // ==========================================
+
+        stage('Verify') {
+            steps {
+                sh '''
+                    echo "===== Docker Images ====="
+
+                    docker images | grep medicare || true
+
+
+                    echo "===== Running Containers ====="
+
+                    docker ps
+
+
+                    echo "===== Backend API Test ====="
+
+                    sleep 10
+
+                    curl -f http://localhost:8082/api/doctors
+                '''
+            }
+        }
     }
-}    
 
+
+    // ==========================================
+    // Post Actions
+    // ==========================================
+
+    post {
+
+        always {
+            sh 'docker logout || true'
+        }
+
+        success {
+            echo 'Medicare CI/CD Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Medicare CI/CD Pipeline failed. Check the failed stage and logs.'
+        }
+    }
+}
 

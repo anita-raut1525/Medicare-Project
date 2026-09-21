@@ -26,8 +26,18 @@ module "jenkins" {
   private_subnet_id = module.network.private_subnet_ids[0]
   security_group_id = module.security.jenkins_security_group_id
 
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
   ami_id        = "ami-01a00762f46d584a1"
+}
+
+
+module "alb" {
+  source = "../../modules/alb"
+
+  environment         = var.environment
+  vpc_id              = module.network.vpc_id
+  public_subnet_ids   = module.network.public_subnet_ids
+  jenkins_instance_id = module.jenkins.jenkins_instance_id
 }
 
 /*
