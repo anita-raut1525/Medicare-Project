@@ -10,5 +10,6 @@ metadata:
 data:
   SERVER_PORT: "8082"
   DB_HOST: "medicare-mysql"
-  DB_PORT: "3306"
+  DB_URL: jdbc:mysql://medicare-mysql:3306/Medicare
   DB_NAME: "Medicare"
+  DB_PORT: "3306"
