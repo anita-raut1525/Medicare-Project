@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: medicare-frontend
-          image: medicare-frontend:3
+          image: anitaraut/medicare-frontend:v3
 
           ports:
             - containerPort: 80

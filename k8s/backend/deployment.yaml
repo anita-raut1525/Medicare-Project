@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: medicare-backend
-          image: medicare-backend:3
+          image: anitaraut/medicare-backend:v3
           ports:
             - containerPort: 8082
 
